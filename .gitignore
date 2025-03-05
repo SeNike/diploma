@@ -1,0 +1,20 @@
+# Local .terraform directories and files
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+*.terraform.lock.hcl
+*.crt
+
+# own secret vars store
+personal.auto.tfvars
+
+
+# Ansible
+**/.vscode/*
+**/inventory/prod.yaml
+
+#Python
+run_project.py
+run.sh

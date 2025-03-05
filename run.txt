@@ -1,0 +1,7 @@
+cd ../backend-setup/
+terraform apply -auto-approve
+cd ..
+./update_backend.sh
+
+cd main-infra
+
