@@ -1,22 +1,63 @@
-variable "yc_token" {
+###cloud vars
+variable "token" {
   type        = string
-  sensitive   = true
+  description = "OAuth-token; https://cloud.yandex.ru/docs/iam/concepts/authorization/oauth-token"
 }
 
-variable "yc_cloud_id" {
-  type = string
+variable "cloud_id" {
+  type        = string
+  description = "https://cloud.yandex.ru/docs/resource-manager/operations/cloud/get-id"
 }
 
-variable "yc_folder_id" {
-  type = string
-}
-
-variable "service_account_id" {
-  type = string
+variable "folder_id" {
+  type        = string
+  description = "https://cloud.yandex.ru/docs/resource-manager/operations/folder/get-id"
 }
 
 variable "default_zone" {
   type        = string
   default     = "ru-central1-a"
   description = "https://cloud.yandex.ru/docs/overview/concepts/geo-scope"
+}
+variable "default_cidr" {
+  type        = list(string)
+  default     = ["192.168.10.0/24"]
+  description = "https://cloud.yandex.ru/docs/vpc/operations/subnet-create"
+}
+
+
+variable "service_account_id" {
+  type        = string
+}
+
+variable "platform" {
+  type        = string
+  default     = "standard-v3"
+  description = "WM Platform"
+}
+
+variable "student_name" {
+  default = "nikiforov"
+}
+
+variable "vm_cores" {
+  type = number
+  default = 2
+  description = "Processor cores"
+}
+
+variable "vm_memory" {
+  type = number
+  default = 4
+  description = "Memory"
+}
+
+variable "scale_count" {
+  type = number
+  default = 3
+  description = "Scale count"
+}
+
+variable "registry_id" {
+  type        = string
 }
