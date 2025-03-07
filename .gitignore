@@ -1,11 +1,14 @@
 # Local .terraform directories and files
 **/.terraform/*
+**/apps/manifests/*
+**/kube-prometheus/*
 
 # .tfstate files
 *.tfstate
 *.tfstate.*
 *.terraform.lock.hcl
 *.crt
+*.bak
 
 # own secret vars store
 personal.auto.tfvars
@@ -17,4 +20,4 @@ personal.auto.tfvars
 
 #Python
 run_project.py
-run.sh
+instr.txt

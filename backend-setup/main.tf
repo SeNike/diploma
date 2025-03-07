@@ -29,6 +29,14 @@ resource "yandex_storage_bucket" "tf_state" {
   secret_key = yandex_iam_service_account_static_access_key.sa_key.secret_key
 }
 
+resource "yandex_container_registry" "my_registry" {
+  name = "my-nginx-registry"
+}
+
+output "registry_id" {
+  value = yandex_container_registry.my_registry.id
+}
+
 output "bucket_name" {
   value = yandex_storage_bucket.tf_state.bucket
 }
