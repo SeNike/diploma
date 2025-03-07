@@ -52,6 +52,8 @@ else
   echo "registry_id = \"${registry_id}\"" > "$TFVARS_FILE"
 fi
 
+sed -i.bak "s|image: cr\.yandex/[^/]*/nginx-static-app:latest|image: cr.yandex/${registry_id}/nginx-static-app:latest|" ../apps/nginx-app.yaml
+
 # Формируем параметры для terraform init
 declare -a backend_config=(-backend-config="access_key=$access_key" -backend-config="secret_key=$secret_key" -backend-config="bucket=$bucket_name")
   #-backend-config="service_account_id=$service_account_id"
@@ -59,6 +61,21 @@ declare -a backend_config=(-backend-config="access_key=$access_key" -backend-con
 
 # Выполняем terraform init
 #echo "Initializing Terraform with:"
-printf "terraform init ${backend_config[@]}"
-#terraform init "${backend_config[@]}"
-#terraform apply -auto-approve
+#printf "terraform init ${backend_config[@]}"
+terraform init "${backend_config[@]}"
+terraform apply -auto-approve
+kubectl apply --server-side -f ../kube-prometheus/manifests/setup
+#kubectl apply --server-side -f ../apps/manifests/
+kubectl wait --for condition=Established --all CustomResourceDefinition --namespace=monitoring
+kubectl apply -f ../kube-prometheus/manifests/
+#kubectl apply -f ../apps/manifests/
+
+kubectl apply -f ../apps/grafana-service.yaml
+kubectl apply -f ../apps/nginx-app.yaml
+
+kubectl create -f https://github.com/grafana/grafana-operator/releases/latest/download/kustomize-namespace_scoped.yaml
+kubectl apply -f ../apps/manifests/sample.yaml 
+# Получить внешние адреса
+sleep 10
+kubectl get svc -n monitoring grafana-external
+kubectl get svc nginx-service

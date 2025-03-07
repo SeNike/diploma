@@ -30,17 +30,7 @@ resource "yandex_vpc_subnet" "public_subnets" {
   v4_cidr_blocks = [cidrsubnet("10.1.0.0/16", 8, count.index)]
 }
 
-# Создание приватных подсетей в трех зонах доступности.
-resource "yandex_vpc_subnet" "private_subnets" {
-  count = 3
-
-  name           = "private-subnet-${count.index}"
-  zone           = "ru-central1-${element(["a", "b", "d"], count.index)}"
-  network_id     = yandex_vpc_network.network.id
-  v4_cidr_blocks = [cidrsubnet("10.2.0.0/16", 8, count.index)]
-}
-
-# 7. Сервисный аккаунт для Kubernetes
+# 4. Сервисный аккаунт для Kubernetes
 # Этот ресурс создает сервисный аккаунт для Kubernetes и назначает ему необходимые роли.
 resource "yandex_iam_service_account" "k8s_sa" {
   name        = "k8s-service-account"
@@ -84,7 +74,7 @@ resource "yandex_resourcemanager_folder_iam_binding" "k8s_admin" {
   ]
 }
 
-# 8. Создаем ключ сервисного аккаунта
+# 5. Создаем ключ сервисного аккаунта
 # Этот ресурс создает ключ для сервисного аккаунта, который будет использоваться для аутентификации в Kubernetes.
 resource "yandex_iam_service_account_key" "k8s_sa_key" {
   service_account_id = yandex_iam_service_account.k8s_sa.id
@@ -92,7 +82,7 @@ resource "yandex_iam_service_account_key" "k8s_sa_key" {
   key_algorithm      = "RSA_4096"
 }
 
-# 9. Кластер Kubernetes
+# 6. Кластер Kubernetes
 # Этот ресурс создает региональный кластер Kubernetes с мастер-узлами в разных зонах доступности.
 resource "yandex_kubernetes_cluster" "regional_cluster" {
   name        = "regional-k8s-cluster"
@@ -113,13 +103,13 @@ resource "yandex_kubernetes_cluster" "regional_cluster" {
     version   = "1.31"
     public_ip = true
 
-    maintenance_policy {
-      auto_upgrade = true
-      maintenance_window {
-        start_time = "03:00"
-        duration   = "3h"
-      }
-    }
+    # maintenance_policy {
+    #   auto_upgrade = true
+    #   maintenance_window {
+    #     start_time = "03:00"
+    #     duration   = "3h"
+    #   }
+    # }
   }
 
   service_account_id      = yandex_iam_service_account.k8s_sa.id
@@ -136,7 +126,7 @@ resource "yandex_kubernetes_cluster" "regional_cluster" {
   ]
 }
 
-# 10. Группы узлов Kubernetes
+# 7. Группы узлов Kubernetes
 # Этот ресурс создает группы узлов Kubernetes с автоматическим масштабированием в разных зонах доступности.
 resource "yandex_kubernetes_node_group" "node_groups" {
   for_each = {
@@ -149,15 +139,19 @@ resource "yandex_kubernetes_node_group" "node_groups" {
   name       = "autoscaling-node-group-${each.key}"
 
   instance_template {
-    platform_id = "standard-v2"
+    platform_id = var.platform
     resources {
-      cores  = 2
-      memory = 4
+      cores  = var.vm_cores
+      memory = var.vm_memory
     }
 
     boot_disk {
-      type = "network-ssd"
-      size = 64
+      type = var.disk_type
+      size = var.disk_size
+    }
+
+    scheduling_policy {
+      preemptible = true
     }
 
     network_interface {
@@ -168,9 +162,9 @@ resource "yandex_kubernetes_node_group" "node_groups" {
 
   scale_policy {
     auto_scale {
-      min     = 1
-      max     = 2
-      initial = 1
+      min     = var.scale_count_min
+      max     = var.scale_count_max
+      initial = var.scale_count_initial
     }
   }
 
@@ -183,7 +177,7 @@ resource "yandex_kubernetes_node_group" "node_groups" {
   depends_on = [yandex_kubernetes_cluster.regional_cluster]
 }
 
-# 11. Настройка kubectl
+# 8. Настройка kubectl
 # Этот ресурс создает директорию для конфигурации kubectl и генерирует kubeconfig файл.
 resource "null_resource" "create_kube_dir" {
   provisioner "local-exec" {
@@ -201,128 +195,4 @@ resource "local_file" "kubeconfig" {
     k8s_cluster_id = yandex_kubernetes_cluster.regional_cluster.id
   })
   file_permission = "0644"  # Права на чтение для всех, запись для владельца
-}
-
-locals {
-  kubeconfig = {
-    apiVersion      = "v1"
-    kind           = "Config"
-    current-context = "yandex-cloud"
-    contexts = [{
-      name = "yandex-cloud"
-      context = {
-        cluster = "yc-cluster"
-        user    = "yc-user"
-      }
-    }]
-    clusters = [{
-      name = "yc-cluster"
-      cluster = {
-        server                   = yandex_kubernetes_cluster.regional_cluster.master[0].external_v4_endpoint
-        certificate-authority-data = base64encode(yandex_kubernetes_cluster.regional_cluster.master[0].cluster_ca_certificate)
-      }
-    }]
-    users = [{
-      name = "yc-user"
-      user = {
-        exec = {
-          apiVersion = "client.authentication.k8s.io/v1beta1"
-          command    = "yc"
-          args = [
-            "k8s",
-            "create-token",
-            "--profile=default",
-            "--format=json"
-          ]
-        }
-      }
-    }]
-  }
-}
-
-# 12. Настраиваем провайдер Kubernetes
-# Этот блок настраивает провайдер Kubernetes для работы с созданным кластером.
-provider "kubernetes" {
-  host = yandex_kubernetes_cluster.regional_cluster.master[0].external_v4_endpoint
-  cluster_ca_certificate = yandex_kubernetes_cluster.regional_cluster.master[0].cluster_ca_certificate
-  
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "yc"
-    args = [
-      "k8s",
-      "create-token",
-      "--profile=default",
-      "--format=json"
-    ]
-  }
-}
-
-resource "time_sleep" "wait_for_cluster" {
-  create_duration = "300s" # Увеличено время ожидания
-  depends_on      = [yandex_kubernetes_cluster.regional_cluster]
-}
-
-# 13. Приложение nginx-static-app
-# Этот ресурс создает deployment и service для приложения nginx-static-app, которое подключается к кластеру MySQL.
-resource "kubernetes_deployment" "nginx-static-app" {
-  depends_on = [
-    time_sleep.wait_for_cluster,
-    #yandex_mdb_mysql_cluster.mysql_cluster,
-    yandex_kubernetes_node_group.node_groups["a"]
-  ]
-
-  metadata {
-    name = "nginx-static-app"
-    labels = {
-      app = "nginx-static-app"
-    }
-  }
-
-  spec {
-    replicas = 1
-
-    selector {
-      match_labels = {
-        app = "nginx-static-app"
-      }
-    }
-
-    template {
-      metadata {
-        labels = {
-          app = "nginx-static-app"
-        }
-      }
-
-      spec {
-        container {
-          name  = "nginx-static-app"
-          image = "cr.yandex/${var.registry_id}/nginx-static-app:latest"
-          port {
-            container_port = 80
-          }
-        }
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "nginx-static-app" {
-  metadata {
-    name = "nginx-static-app-service"
-  }
-
-  spec {
-    selector = {
-      app = kubernetes_deployment.nginx-static-app.metadata[0].labels.app
-    }
-    port {
-      port        = 80
-      target_port = 80
-    }
-    type = "LoadBalancer"
-  }
-
-  depends_on = [kubernetes_deployment.nginx-static-app]
 }

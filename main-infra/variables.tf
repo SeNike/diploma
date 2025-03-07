@@ -36,10 +36,6 @@ variable "platform" {
   description = "WM Platform"
 }
 
-variable "student_name" {
-  default = "nikiforov"
-}
-
 variable "vm_cores" {
   type = number
   default = 2
@@ -52,12 +48,37 @@ variable "vm_memory" {
   description = "Memory"
 }
 
-variable "scale_count" {
+variable "scale_count_min" {
   type = number
-  default = 3
+  default = 1
+  description = "Scale count"
+}
+
+variable "scale_count_max" {
+  type = number
+  default = 2
+  description = "Scale count"
+}
+
+variable "scale_count_initial" {
+  type = number
+  default = 1
   description = "Scale count"
 }
 
 variable "registry_id" {
   type        = string
 }
+
+variable "disk_size" {
+  type = number
+  default = 64
+  description = "Disk size"
+}
+
+variable "disk_type" {
+  type        = string
+  default     = "network-ssd"
+  description = "Disk type"
+}
+
