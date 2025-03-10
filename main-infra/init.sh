@@ -76,6 +76,6 @@ kubectl apply -f ../apps/nginx-app.yaml
 kubectl create -f https://github.com/grafana/grafana-operator/releases/latest/download/kustomize-namespace_scoped.yaml
 kubectl apply -f ../apps/manifests/sample.yaml 
 # Получить внешние адреса
-sleep 10
+sleep 20
 kubectl get svc -n monitoring grafana-external
 kubectl get svc nginx-service
