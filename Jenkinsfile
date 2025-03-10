@@ -4,6 +4,7 @@ pipeline {
     environment {
         REGISTRY = "cr.yandex/<registry-id>"
         APP_NAME = "nginx-static-app"
+        KUBE_CONFIG = credentials('kubeconfig')
     }
 
     stages {
@@ -41,10 +42,12 @@ pipeline {
                     docker.image("${REGISTRY}/${APP_NAME}:${env.GIT_COMMIT}").push("${env.TAG_NAME}")
                     
                     // Деплой в Kubernetes
-                    sh """
-                        kubectl set image deployment/nginx-deployment \
-                        nginx=${REGISTRY}/${APP_NAME}:${env.TAG_NAME} --record
-                    """
+                    withKubeConfig([credentialsId: 'kubeconfig']) {
+                        sh """
+                            kubectl set image deployment/nginx-deployment \
+                            nginx=${REGISTRY}/${APP_NAME}:${env.TAG_NAME} --record
+                        """
+                    }
                 }
             }
         }
