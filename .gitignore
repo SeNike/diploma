@@ -3,6 +3,7 @@
 **/apps/manifests/*
 **/kube-prometheus/*
 
+
 # .tfstate files
 *.tfstate
 *.tfstate.*
