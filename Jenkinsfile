@@ -12,9 +12,18 @@ pipeline {
                 script {
                     def access_key = sh(script: "docker run --network=host -e VAULT_ADDR='${VAULT_ADDR}' -e VAULT_TOKEN='${VAULT_TOKEN}' vault:1.13.3 sh -c \"vault kv get -field=value secret/access_key\"", returnStdout: true).trim()
                     def secret_key = sh(script: "docker run --network=host -e VAULT_ADDR='${VAULT_ADDR}' -e VAULT_TOKEN='${VAULT_TOKEN}' vault:1.13.3 sh -c \"vault kv get -field=value secret/secret_key\"", returnStdout: true).trim()
-
+                    def access_key = sh(script: "docker run --network=host -e VAULT_ADDR='${VAULT_ADDR}' -e VAULT_TOKEN='${VAULT_TOKEN}' vault:1.13.3 sh -c \"vault kv get -field=value secret/token\"", returnStdout: true).trim()
+                    def secret_key = sh(script: "docker run --network=host -e VAULT_ADDR='${VAULT_ADDR}' -e VAULT_TOKEN='${VAULT_TOKEN}' vault:1.13.3 sh -c \"vault kv get -field=value secret/cloud_id\"", returnStdout: true).trim()       
+                    def access_key = sh(script: "docker run --network=host -e VAULT_ADDR='${VAULT_ADDR}' -e VAULT_TOKEN='${VAULT_TOKEN}' vault:1.13.3 sh -c \"vault kv get -field=value secret/folder_id\"", returnStdout: true).trim()
+                    def secret_key = sh(script: "docker run --network=host -e VAULT_ADDR='${VAULT_ADDR}' -e VAULT_TOKEN='${VAULT_TOKEN}' vault:1.13.3 sh -c \"vault kv get -field=value secret/service_account_id\"", returnStdout: true).trim()    
+                    def secret_key = sh(script: "docker run --network=host -e VAULT_ADDR='${VAULT_ADDR}' -e VAULT_TOKEN='${VAULT_TOKEN}' vault:1.13.3 sh -c \"vault kv get -field=value secret/registry_id\"", returnStdout: true).trim()                              
                     env.ACCESS_KEY = access_key
                     env.SECRET_KEY = secret_key
+                    env.TOKEN = token
+                    env.CLOUD_ID = cloud_id
+                    env.FOLDER_ID = folder_id
+                    env.SERVICE_ACCOUNT_ID = service_account_id
+                    env.REGISTRY_ID = registry_id
                 }
             }
         }
@@ -33,7 +42,12 @@ pipeline {
             steps {
              sh """
                     export PATH="/var/lib/jenkins:$PATH"
-                    cd main-infra/                
+                    cd main-infra/   
+                    export YC_TOKEN=${env.TOKEN}
+                    export YC_CLOUD_ID=${env.CLOUD_ID}
+                    export YC_FOLDER_ID=${env.FOLDER_ID}
+                    export YC_SERVICE_ACCOUNT_ID=${env.SERVICE_ACCOUNT_ID}
+                    export YC_REGISTRY_ID=${env.REGISTRY_ID} 
                     terraform apply -auto-approve
                     """  
             }
