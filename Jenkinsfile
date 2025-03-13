@@ -23,14 +23,17 @@ pipeline {
             steps {
                  sh """
                     export PATH="/var/lib/jenkins:$PATH"
-                    terraform init -backend-config=\"access_key=${env.ACCESS_KEY}\" -backend-config=\"secret_key=${env.SECRET_KEY}\"
+                    terraform init -backend-config=\"access_key=${env.ACCESS_KEY}\" -backend-config=\"secret_key=${env.SECRET_KEY}\" > /dev/null
                     """
 
             }
         }
         stage('Terraform apply') {
             steps {
-                sh "terraform apply -auto-approve"
+             sh """
+                export PATH="/var/lib/jenkins:$PATH"
+                terraform apply -auto-approve"
+                """  
             }
         }        
     }
