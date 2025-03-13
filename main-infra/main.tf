@@ -181,7 +181,7 @@ resource "yandex_kubernetes_node_group" "node_groups" {
 # Этот ресурс создает директорию для конфигурации kubectl и генерирует kubeconfig файл.
 resource "null_resource" "create_kube_dir" {
   provisioner "local-exec" {
-    command = "mkdir -p /home/se/.kube && chmod 700 /home/se/.kube"
+    command = "mkdir -p /home/se/.kube && chmod 760 /home/se/.kube"
   }
 }
 
