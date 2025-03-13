@@ -13,7 +13,6 @@ pipeline {
                     def access_key = sh(script: "docker run --network=host -e VAULT_ADDR='${VAULT_ADDR}' -e VAULT_TOKEN='${VAULT_TOKEN}' vault:1.13.3 sh -c \"vault kv get -field=value secret/access_key\"", returnStdout: true).trim()
                     def secret_key = sh(script: "docker run --network=host -e VAULT_ADDR='${VAULT_ADDR}' -e VAULT_TOKEN='${VAULT_TOKEN}' vault:1.13.3 sh -c \"vault kv get -field=value secret/secret_key\"", returnStdout: true).trim()
 
-                    // Сохранение переменных для использования в других этапах
                     env.ACCESS_KEY = access_key
                     env.SECRET_KEY = secret_key
                 }
