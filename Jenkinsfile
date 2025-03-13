@@ -23,6 +23,7 @@ pipeline {
             steps {
                  sh """
                     export PATH="/var/lib/jenkins:$PATH"
+                    cd main-infra/
                     terraform init -backend-config=\"access_key=${env.ACCESS_KEY}\" -backend-config=\"secret_key=${env.SECRET_KEY}\" > /dev/null
                     """
 
@@ -31,9 +32,10 @@ pipeline {
         stage('Terraform apply') {
             steps {
              sh """
-                export PATH="/var/lib/jenkins:$PATH"
-                terraform apply -auto-approve
-                """  
+                    export PATH="/var/lib/jenkins:$PATH"
+                    cd main-infra/                
+                    terraform apply -auto-approve
+                    """  
             }
         }        
     }
