@@ -2,54 +2,33 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY = "cr.yandex/<registry-id>"
-        APP_NAME = "nginx-static-app"
-        KUBE_CONFIG = credentials('kubeconfig')
+        VAULT_ADDR = "http://127.0.0.1:8200"
+        VAULT_TOKEN = "education"
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git url: 'https://github.com/SeNike/nginx-static-app.git', branch: 'main'
-            }
-        }
-
-        stage('Build Docker Image') {
+        stage('Get Credentials from Vault') {
             steps {
                 script {
-                    docker.build("${REGISTRY}/${APP_NAME}:${env.GIT_COMMIT}")
+                    def access_key = sh(script: "docker run --network=host -e VAULT_ADDR='${VAULT_ADDR}' -e VAULT_TOKEN='${VAULT_TOKEN}' vault:1.13.3 sh -c \"vault kv get -field=value secret/access_key\"", returnStdout: true).trim()
+                    def secret_key = sh(script: "docker run --network=host -e VAULT_ADDR='${VAULT_ADDR}' -e VAULT_TOKEN='${VAULT_TOKEN}' vault:1.13.3 sh -c \"vault kv get -field=value secret/secret_key\"", returnStdout: true).trim()
+
+                    // Сохранение переменных для использования в других этапах
+                    env.ACCESS_KEY = access_key
+                    env.SECRET_KEY = secret_key
                 }
             }
         }
 
-        stage('Push to YCR') {
+        stage('Terraform Init') {
             steps {
-                script {
-                    docker.withRegistry('https://cr.yandex', 'ycr-credentials') {
-                        docker.image("${REGISTRY}/${APP_NAME}:${env.GIT_COMMIT}").push()
-                    }
-                }
+                sh "terraform init -backend-config=\"access_key=${env.ACCESS_KEY}\" -backend-config=\"secret_key=${env.SECRET_KEY}\""
             }
         }
-
-        stage('Tagged Release') {
-            when {
-                buildingTag()
-            }
+        stage('Terraform apply') {
             steps {
-                script {
-                    // Пуш тегированного образа
-                    docker.image("${REGISTRY}/${APP_NAME}:${env.GIT_COMMIT}").push("${env.TAG_NAME}")
-                    
-                    // Деплой в Kubernetes
-                    withKubeConfig([credentialsId: 'kubeconfig']) {
-                        sh """
-                            kubectl set image deployment/nginx-deployment \
-                            nginx=${REGISTRY}/${APP_NAME}:${env.TAG_NAME} --record
-                        """
-                    }
-                }
+                sh "terraform apply -auto-approve"
             }
-        }
+        }        
     }
 }
