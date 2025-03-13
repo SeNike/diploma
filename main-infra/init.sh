@@ -12,6 +12,9 @@ bucket_name=$(jq -r '.outputs.bucket_name.value' "$TFSTATE_FILE")
 service_account_id=$(jq -r '.outputs.service_account_id.value' "$TFSTATE_FILE")
 registry_id=$(jq -r '.outputs.registry_id.value' "$TFSTATE_FILE")
 
+docker run --network=host -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN="education" vault:1.13.3 sh -c "vault kv put secret/access_key value=$access_key"
+docker run --network=host -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN="education" vault:1.13.3 sh -c "vault kv put secret/secret_key value=$secret_key"
+
 # Проверяем наличие всех значений
 declare -A required_vars=(
   ["access_key"]=$access_key
@@ -52,10 +55,16 @@ else
   echo "registry_id = \"${registry_id}\"" > "$TFVARS_FILE"
 fi
 
-sed -i.bak "s|image: cr\.yandex/[^/]*/nginx-static-app:latest|image: cr.yandex/${registry_id}/nginx-static-app:latest|" ../apps/nginx-app.yaml
+sed -i.bak "s|image: cr\.yandex/[^/]*/nginx-static-app:latest|image: cr.yandex/${registry_id}/nginx-static-app:latest|" ../../Diploma_dep/nginx-static-app/nginx-app.yaml
+
+sed -i -E "/REGISTRY[[:space:]]*=[[:space:]]*\"cr\.yandex\//s/\/[^\"]*/\/$registry_id/" ../../Diploma_dep/nginx-static-app/Jenkinsfile
+
+sed -i -E "s/(bucket[[:space:]]*=[[:space:]]*).*/\1\"${bucket_name}\"/" backend.tf
+
+#cp -fv ../apps/nginx-app.yaml ../../Diploma_dep/nginx-static-app/nginx-app.yaml
 
 # Формируем параметры для terraform init
-declare -a backend_config=(-backend-config="access_key=$access_key" -backend-config="secret_key=$secret_key" -backend-config="bucket=$bucket_name")
+declare -a backend_config=(-backend-config="access_key=$access_key" -backend-config="secret_key=$secret_key")
   #-backend-config="service_account_id=$service_account_id"
 
 
@@ -71,7 +80,7 @@ kubectl apply -f ../kube-prometheus/manifests/
 #kubectl apply -f ../apps/manifests/
 
 kubectl apply -f ../apps/grafana-service.yaml
-kubectl apply -f ../apps/nginx-app.yaml
+kubectl apply -f ../../Diploma_dep/nginx-static-app/nginx-app.yaml
 
 kubectl create -f https://github.com/grafana/grafana-operator/releases/latest/download/kustomize-namespace_scoped.yaml
 kubectl apply -f ../apps/manifests/sample.yaml 
@@ -79,3 +88,6 @@ kubectl apply -f ../apps/manifests/sample.yaml
 sleep 20
 kubectl get svc -n monitoring grafana-external
 kubectl get svc nginx-service
+
+sudo cp -f ~/.kube/config /var/lib/jenkins/.kube/config
+sudo chown jenkins:jenkins /var/lib/jenkins/.kube/config
