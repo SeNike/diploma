@@ -45,12 +45,12 @@ pipeline {
              sh """
                     export PATH="/var/lib/jenkins:$PATH"
                     cd main-infra/   
-                    export YC_TOKEN="${env.TOKEN}"
-                    export YC_CLOUD_ID="${env.CLOUD_ID}"
-                    export YC_FOLDER_ID="${env.FOLDER_ID}"
-                    export YC_SERVICE_ACCOUNT_ID="${env.SERVICE_ACCOUNT_ID}"
-                    export YC_REGISTRY_ID="${env.REGISTRY_ID}" 
-                    terraform apply -auto-approve
+                    terraform apply \
+                    -var="token=${env.TOKEN}" \
+                    -var="cloud_id=${env.CLOUD_ID}" \
+                    -var="folder_id=${env.FOLDER_ID}" \
+                    -var="service_account_id=${env.SERVICE_ACCOUNT_ID}" \
+                    -var="registry_id=${env.REGISTRY_ID}"
                     """  
             }
         }        
