@@ -188,11 +188,11 @@ resource "null_resource" "create_kube_dir" {
 provider "local" {}
 
 resource "local_file" "kubeconfig" {
-  filename        = "/home/se/.kube/config"
+  filename        = var.kube_config
   content         = templatefile("${path.module}/kubeconfig.tpl", {
     endpoint       = yandex_kubernetes_cluster.regional_cluster.master[0].external_v4_endpoint
     cluster_ca     = base64encode(yandex_kubernetes_cluster.regional_cluster.master[0].cluster_ca_certificate)
     k8s_cluster_id = yandex_kubernetes_cluster.regional_cluster.id
   })
-  file_permission = "0644"  # Права на чтение для всех, запись для владельца
+  file_permission = "0760"  # Права на чтение для всех, запись для владельца
 }

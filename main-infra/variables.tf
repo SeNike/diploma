@@ -82,3 +82,7 @@ variable "disk_type" {
   description = "Disk type"
 }
 
+variable "kube_config" {
+  type        = string
+  default     = "/home/se/.kube/config"
+}
