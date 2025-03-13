@@ -15,6 +15,25 @@ registry_id=$(jq -r '.outputs.registry_id.value' "$TFSTATE_FILE")
 docker run --network=host -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN="education" vault:1.13.3 sh -c "vault kv put secret/access_key value=$access_key"
 docker run --network=host -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN="education" vault:1.13.3 sh -c "vault kv put secret/secret_key value=$secret_key"
 
+docker run --network=host -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN="education" vault:1.13.3 sh -c "vault kv put secret/service_account_id value=$service_account_id"
+docker run --network=host -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN="education" vault:1.13.3 sh -c "vault kv put secret/registry_id value=$registry_id"
+
+# Функция для извлечения значения по ключу из файла
+get_key_value() {
+    local key_name="$1"
+    grep -E "^[[:space:]]*${key_name}[[:space:]]*=" personal.auto.tfvars | \
+    sed -E 's/^[^=]*=[[:space:]]*"?([^"]*)"?[[:space:]]*$/\1/' | \
+    head -n 1
+}
+# Извлекаем значения
+token=$(get_key_value "token")
+cloud_id=$(get_key_value "cloud_id")
+folder_id=$(get_key_value "folder_id")
+
+docker run --network=host -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN="education" vault:1.13.3 sh -c "vault kv put secret/token value=$token"
+docker run --network=host -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN="education" vault:1.13.3 sh -c "vault kv put secret/cloud_id value=$cloud_id"
+docker run --network=host -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN="education" vault:1.13.3 sh -c "vault kv put secret/folder_id value=$folder_id"
+
 # Проверяем наличие всех значений
 declare -A required_vars=(
   ["access_key"]=$access_key
