@@ -21,8 +21,11 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                export PATH="/var/lib/jenkins:$PATH"
-                sh "terraform init -backend-config=\"access_key=${env.ACCESS_KEY}\" -backend-config=\"secret_key=${env.SECRET_KEY}\""
+                 sh """
+                    export PATH="/var/lib/jenkins:$PATH"
+                    terraform init -backend-config=\"access_key=${env.ACCESS_KEY}\" -backend-config=\"secret_key=${env.SECRET_KEY}\"
+                    """
+
             }
         }
         stage('Terraform apply') {
