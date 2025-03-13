@@ -32,7 +32,7 @@ pipeline {
             steps {
              sh """
                 export PATH="/var/lib/jenkins:$PATH"
-                terraform apply -auto-approve"
+                terraform apply -auto-approve
                 """  
             }
         }        
