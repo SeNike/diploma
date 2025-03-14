@@ -34,24 +34,23 @@ pipeline {
                  sh """
                     export PATH="/var/lib/jenkins:$PATH"
                     cd main-infra/
-                    terraform init -backend-config=\"access_key=${env.ACCESS_KEY}\" -backend-config=\"secret_key=${env.SECRET_KEY}\" > /dev/null
+                    terraform init -backend-config=\"access_key=${env.ACCESS_KEY}\" -backend-config=\"secret_key=${env.SECRET_KEY}\"
                     """
 
             }
         }
         stage('Terraform apply') {
             steps {
-             sh """             
-                sg se -c "
-                export PATH=\"/var/lib/jenkins:$PATH\"
-                cd main-infra/
-                terraform apply -auto-approve \
-                    -var=\"token=${TOKEN}\" \
-                    -var=\"cloud_id=${CLOUD_ID}\" \
-                    -var=\"folder_id=${FOLDER_ID}\" \
-                    -var=\"service_account_id=${SERVICE_ACCOUNT_ID}\" \
-                    -var=\"registry_id=${REGISTRY_ID}\" > /dev/null 2>&1"
-                """  
+             sh """ newgrp se
+                    export PATH="/var/lib/jenkins:$PATH"
+                    cd main-infra/   
+                    terraform apply \
+                    -var="token=${env.TOKEN}" \
+                    -var="cloud_id=${env.CLOUD_ID}" \
+                    -var="folder_id=${env.FOLDER_ID}" \
+                    -var="service_account_id=${env.SERVICE_ACCOUNT_ID}" \
+                    -var="registry_id=${env.REGISTRY_ID}"
+                    """  
             }
         }        
     }
