@@ -34,7 +34,7 @@ pipeline {
                  sh """
                     export PATH="/var/lib/jenkins:$PATH"
                     cd main-infra/
-                    terraform init -backend-config=\"access_key=${env.ACCESS_KEY}\" -backend-config=\"secret_key=${env.SECRET_KEY}\"
+                    terraform init -backend-config=\"access_key=${env.ACCESS_KEY}\" -backend-config=\"secret_key=${env.SECRET_KEY}\" 
                     """
 
             }
