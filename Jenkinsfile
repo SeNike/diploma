@@ -41,7 +41,7 @@ pipeline {
         }
         stage('Terraform apply') {
             steps {
-             sh """ newgrp se
+             sh """ 
                     export PATH="/var/lib/jenkins:$PATH"
                     cd main-infra/   
                     terraform apply \
