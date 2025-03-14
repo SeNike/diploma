@@ -33,15 +33,17 @@ pipeline {
         stage('Terraform Init') {
             steps {
                  sh """
+                    set +x
                     export PATH="/var/lib/jenkins:$PATH"
                     cd main-infra/
                     terraform init -backend-config=\"access_key=${env.ACCESS_KEY}\" -backend-config=\"secret_key=${env.SECRET_KEY}\" 
+                    set +x
                     """
             }
         }
         stage('Terraform apply') {
             steps {
-             sh """ 
+             sh """ set +x
                     export PATH="/var/lib/jenkins:$PATH"
                     cd main-infra/   
                     terraform apply \
@@ -50,6 +52,7 @@ pipeline {
                     -var="folder_id=${env.FOLDER_ID}" \
                     -var="service_account_id=${env.SERVICE_ACCOUNT_ID}" \
                     -var="registry_id=${env.REGISTRY_ID}"
+                    set +x
                     """  
             }
         }        

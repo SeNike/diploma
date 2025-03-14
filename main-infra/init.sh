@@ -108,5 +108,5 @@ sleep 20
 kubectl get svc -n monitoring grafana-external
 kubectl get svc nginx-service
 
-sudo cp -f ~/.kube/config /var/lib/jenkins/.kube/config
-sudo chown jenkins:jenkins /var/lib/jenkins/.kube/config
+#sudo cp -f ~/.kube/config /var/lib/jenkins/.kube/config
+#sudo chown jenkins:jenkins /var/lib/jenkins/.kube/config
