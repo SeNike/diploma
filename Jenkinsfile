@@ -36,7 +36,6 @@ pipeline {
                     cd main-infra/
                     terraform init -backend-config=\"access_key=${env.ACCESS_KEY}\" -backend-config=\"secret_key=${env.SECRET_KEY}\" 
                     """
-
             }
         }
         stage('Terraform apply') {
