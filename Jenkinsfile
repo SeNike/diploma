@@ -41,16 +41,17 @@ pipeline {
         }
         stage('Terraform apply') {
             steps {
-             sh """
-                    export PATH="/var/lib/jenkins:$PATH"
-                    cd main-infra/   
-                    terraform apply \
-                    -var="token=${env.TOKEN}" \
-                    -var="cloud_id=${env.CLOUD_ID}" \
-                    -var="folder_id=${env.FOLDER_ID}" \
-                    -var="service_account_id=${env.SERVICE_ACCOUNT_ID}" \
-                    -var="registry_id=${env.REGISTRY_ID}"
-                    """  
+             sh """             
+                sg se -c "
+                export PATH=\"/var/lib/jenkins:$PATH\"
+                cd main-infra/
+                terraform apply -auto-approve \
+                    -var=\"token=${TOKEN}\" \
+                    -var=\"cloud_id=${CLOUD_ID}\" \
+                    -var=\"folder_id=${FOLDER_ID}\" \
+                    -var=\"service_account_id=${SERVICE_ACCOUNT_ID}\" \
+                    -var=\"registry_id=${REGISTRY_ID}\" > /dev/null 2>&1"
+                """  
             }
         }        
     }
