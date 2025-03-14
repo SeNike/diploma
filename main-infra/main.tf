@@ -179,11 +179,11 @@ resource "yandex_kubernetes_node_group" "node_groups" {
 
 # 8. Настройка kubectl
 # Этот ресурс создает директорию для конфигурации kubectl и генерирует kubeconfig файл.
-resource "null_resource" "create_kube_dir" {
-  provisioner "local-exec" {
-    command = "mkdir -p /home/se/.kube && chmod 760 /home/se/.kube"
-  }
-}
+# resource "null_resource" "create_kube_dir" {
+#   provisioner "local-exec" {
+#     command = "mkdir -p /home/se/.kube && chmod 760 /home/se/.kube"
+#   }
+# }
 
 provider "local" {}
 
@@ -194,5 +194,5 @@ resource "local_file" "kubeconfig" {
     cluster_ca     = base64encode(yandex_kubernetes_cluster.regional_cluster.master[0].cluster_ca_certificate)
     k8s_cluster_id = yandex_kubernetes_cluster.regional_cluster.id
   })
-  file_permission = "0760"  # Права на чтение для всех, запись для владельца
+  #file_permission = "0760"  # Права на чтение для всех, запись для владельца
 }
