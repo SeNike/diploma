@@ -1,4 +1,4 @@
-
+# Дипломная работа
 ---
 ## Цели:
 
@@ -81,11 +81,22 @@
 1. Работоспособный Kubernetes кластер.
 2. В файле `~/.kube/config` находятся данные для доступа к кластеру.
 3. Команда `kubectl get pods --all-namespaces` отрабатывает без ошибок.
-4. Собранный docker image в региртри [Yandex Container Registry](https://cloud.yandex.ru/services/container-registry).
-5. Настроена система мониторинга.  В кластер задеплоины [prometheus](https://prometheus.io/), [grafana](https://grafana.com/), [alertmanager](https://github.com/prometheus/alertmanager), [экспортер](https://github.com/prometheus/node_exporter) основных метрик Kubernetes. Интерфейс Grafana доступен по адресу [http://158.160.176.181](http://158.160.176.181)
-6. Развернуто тестовое приложение. Интерфейс приложения доступен по адресу [http://158.160.176.181](158.160.171.205)
 
 ![Image](https://github.com/SeNike/Study_24/blob/main/Diploma/get_pods.png)
+
+4. Собранный docker image в региcтри [Yandex Container Registry](https://cloud.yandex.ru/services/container-registry).
+
+![Image](https://github.com/SeNike/Study_24/blob/main/Diploma/registry.png)
+
+5. Настроена система мониторинга.  В кластер задеплоины [prometheus](https://prometheus.io/), [grafana](https://grafana.com/), [alertmanager](https://github.com/prometheus/alertmanager), [экспортер](https://github.com/prometheus/node_exporter) основных метрик Kubernetes. Интерфейс Grafana доступен по адресу [http://158.160.176.181](http://158.160.176.181) (admin/netology)
+
+![Image](https://github.com/SeNike/Study_24/blob/main/Diploma/kube_grafana.png)
+
+![Image](https://github.com/SeNike/Study_24/blob/main/Diploma/node_grafana.png)
+
+6. Развернуто тестовое приложение. Интерфейс приложения доступен по адресу [http://158.160.176.181](158.160.171.205)
+
+
 
 
 ### Установка и настройка CI/CD
@@ -95,6 +106,9 @@
 1. Интерфейс ci/cd [jenkins](https://www.jenkins.io/) сервиса доступен по http [http://95.161.12.39:8080](http://95.161.12.39:8080).
 2. При любом коммите в репозиторие с тестовым приложением происходит сборка и отправка в регистр Docker образа.
 3. При создании тега (например, v1.0.0) происходит сборка и отправка с соответствующим label в регистри, а также деплой соответствующего Docker образа в кластер Kubernetes([Jenkinsfile](https://github.com/SeNike/nginx-static-app/blob/main/Jenkinsfile)).
+
+![Image](https://github.com/SeNike/Study_24/blob/main/Diploma/registry.png)
+
 4. Автоматический запуск и применение конфигурации terraform из git-репозитория при любом комите в main ветку ([Jenkinsfile](https://github.com/SeNike/diploma/blob/main/Jenkinsfile)).
 
 ![Image](https://github.com/SeNike/Study_24/blob/main/Diploma/jenkins0.png)
