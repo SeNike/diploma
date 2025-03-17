@@ -2,7 +2,7 @@
 
 set -e
 
-TFSTATE_FILE="../backend-setup/terraform.tfstate"  # Путь относительно main-infra/
+TFSTATE_FILE="../init-bucket/terraform.tfstate"  # Путь относительно main-infra/
 TFVARS_FILE="personal.auto.tfvars"
 
 # Извлекаем значения из tfstate
@@ -80,24 +80,14 @@ sed -i -E "/REGISTRY[[:space:]]*=[[:space:]]*\"cr\.yandex\//s/\/[^\"]*/\/$regist
 
 sed -i -E "s/(bucket[[:space:]]*=[[:space:]]*).*/\1\"${bucket_name}\"/" backend.tf
 
-#cp -fv ../apps/nginx-app.yaml ../../Diploma_dep/nginx-static-app/nginx-app.yaml
-
 # Формируем параметры для terraform init
 declare -a backend_config=(-backend-config="access_key=$access_key" -backend-config="secret_key=$secret_key")
-  #-backend-config="service_account_id=$service_account_id"
-
-
 # Выполняем terraform init
-#echo "Initializing Terraform with:"
-#printf "terraform init ${backend_config[@]}"
 terraform init "${backend_config[@]}"
 terraform apply -auto-approve
 kubectl apply --server-side -f ../kube-prometheus/manifests/setup
-#kubectl apply --server-side -f ../apps/manifests/
 kubectl wait --for condition=Established --all CustomResourceDefinition --namespace=monitoring
 kubectl apply -f ../kube-prometheus/manifests/
-#kubectl apply -f ../apps/manifests/
-
 kubectl apply -f ../apps/grafana-service.yaml
 kubectl apply -f ../../Diploma_dep/nginx-static-app/nginx-app.yaml
 
@@ -107,6 +97,3 @@ kubectl apply -f ../apps/manifests/sample.yaml
 sleep 20
 kubectl get svc -n monitoring grafana-external
 kubectl get svc nginx-service
-
-#sudo cp -f ~/.kube/config /var/lib/jenkins/.kube/config
-#sudo chown jenkins:jenkins /var/lib/jenkins/.kube/config
