@@ -94,5 +94,7 @@
 
 1. Интерфейс ci/cd [jenkins](https://www.jenkins.io/) сервиса доступен по http [http://95.161.12.39:8080](http://95.161.12.39:8080).
 2. При любом коммите в репозиторие с тестовым приложением происходит сборка и отправка в регистр Docker образа.
-3. При создании тега (например, v1.0.0) происходит сборка и отправка с соответствующим label в регистри, а также деплой соответствующего Docker образа в кластер Kubernetes.
+3. При создании тега (например, v1.0.0) происходит сборка и отправка с соответствующим label в регистри, а также деплой соответствующего Docker образа в кластер Kubernetes([Jenkinsfile](https://github.com/SeNike/nginx-static-app/blob/main/Jenkinsfile)).
+4. Автоматический запуск и применение конфигурации terraform из git-репозитория при любом комите в main ветку ([Jenkinsfile](https://github.com/SeNike/diploma/blob/main/Jenkinsfile)).
 
+![Image](https://github.com/SeNike/Study_24/blob/main/Diploma/jenkins0.png)
