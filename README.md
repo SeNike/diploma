@@ -88,7 +88,7 @@
 
 ![Image](https://github.com/SeNike/Study_24/blob/main/Diploma/registry.png)
 
-5. Настроена система мониторинга.  В кластер задеплоины [prometheus](https://prometheus.io/), [grafana](https://grafana.com/), [alertmanager](https://github.com/prometheus/alertmanager), [экспортер](https://github.com/prometheus/node_exporter) основных метрик Kubernetes. Интерфейс Grafana доступен по адресу [http://158.160.176.181](http://158.160.176.181) (admin/netology)
+5. Настроена система мониторинга.  В кластер задеплоины [prometheus](https://prometheus.io/), [grafana](https://grafana.com/), [alertmanager](https://github.com/prometheus/alertmanager), [экспортер](https://github.com/prometheus/node_exporter) основных метрик Kubernetes. Интерфейс Grafana доступен по адресу [http://158.160.176.181](http://158.160.176.181)
 
 ![Image](https://github.com/SeNike/Study_24/blob/main/Diploma/kube_grafana.png)
 
@@ -102,7 +102,7 @@
 
 Ожидаемый результат:
 
-1. Интерфейс ci/cd [jenkins](https://www.jenkins.io/) сервиса доступен по http [http://95.161.12.39:8080](http://95.161.12.39:8080) (netology/netology).
+1. Интерфейс ci/cd [jenkins](https://www.jenkins.io/) сервиса доступен по http [http://95.161.12.39:8080](http://95.161.12.39:8080).
 2. При любом коммите в репозиторие с тестовым приложением происходит сборка и отправка в регистр Docker образа.
 3. При создании тега (например, v1.0.0) происходит сборка и отправка с соответствующим label в регистри, а также деплой соответствующего Docker образа в кластер Kubernetes([Jenkinsfile](https://github.com/SeNike/nginx-static-app/blob/main/Jenkinsfile)).
 
