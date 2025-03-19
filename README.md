@@ -111,3 +111,22 @@
 4. Автоматический запуск и применение конфигурации terraform из git-репозитория при любом комите в main ветку ([Jenkinsfile](https://github.com/SeNike/diploma/blob/main/Jenkinsfile)).
 
 ![Image](https://github.com/SeNike/Study_24/blob/main/Diploma/jenkins0.png)
+
+## Задание на доработку:
+
+Привести логику работы пайплайна в соответствие с заданием. При запуске для git-тега должна происходить сборка с тегом образа, соответствующим git-тегу, с последующим деплоем, а при запуске пайплайна не из git-тега, просто сборка и отправка в registry latest-образа.
+
+### Доработка
+
+Выполнена доработка файла [Jenkinsfile](https://github.com/SeNike/nginx-static-app/blob/main/Jenkinsfile).
+
+При коммите в refs/tags/* происходит сборка с тегом образа, соответствующим git-тегу, с последующим деплоем.
+
+![Image](https://github.com/SeNike/Study_24/blob/main/Diploma/tag.png)
+
+При коммите в ветку main происходит просто сборка и отправка в registry latest-образа
+![Image](https://github.com/SeNike/Study_24/blob/main/Diploma/no-tag.png)
+
+Образы в registry:
+
+![Image](https://github.com/SeNike/Study_24/blob/main/Diploma/registry-latest.png)
